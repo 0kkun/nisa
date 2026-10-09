@@ -1,0 +1,71 @@
+x-app-environment: &app-environment
+  APP_NAME: "NISA Timing"
+  APP_URL: http://localhost:8080
+  APP_LOCALE: ja
+  DB_CONNECTION: mysql
+  DB_HOST: db
+  DB_PORT: 3306
+  DB_DATABASE: nisa_db
+  DB_USERNAME: app_user
+  DB_PASSWORD: app_password
+
+services:
+  nginx:
+    container_name: nisa-nginx
+    build:
+      context: ./.docker/nginx
+    ports:
+      - 8080:80
+    volumes:
+      - ./public:/var/www/public
+      - ./.docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - app
+
+  app:
+    container_name: nisa-app
+    build:
+      context: .
+      dockerfile: .docker/php/Dockerfile
+    ports:
+      - 5174:5173
+    volumes:
+      - ./:/var/www
+    environment: *app-environment
+    tty: true
+    depends_on:
+      db:
+        condition: service_healthy
+
+  scheduler:
+    container_name: nisa-scheduler
+    build:
+      context: .
+      dockerfile: .docker/php/Dockerfile
+    volumes:
+      - ./:/var/www
+    environment: *app-environment
+    command: php artisan schedule:work
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    container_name: nisa-db
+    build:
+      context: .docker/db
+    ports:
+      - 3307:3306
+    volumes:
+      - ./.docker/db/data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: nisa_db
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: app_password
+      MYSQL_ROOT_PASSWORD: root_password
+      TZ: Asia/Tokyo
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
