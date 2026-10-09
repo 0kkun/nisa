@@ -14,6 +14,5 @@ final readonly class TimingScore
         public int $max,
         public array $breakdown,
         public TimingLevel $level,
-    ) {
-    }
+    ) {}
 }

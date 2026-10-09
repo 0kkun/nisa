@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 
 class MarketSnapshotBuilderTest extends TestCase
 {
-    public function test_SP500の営業日ごとにスナップショットを作る(): void
+    public function test_s_p500の営業日ごとにスナップショットを作る(): void
     {
         $snapshots = (new MarketSnapshotBuilder(highWindowDays: 3, movingAverageDays: 2))->build(
             sp500: ['2026-01-05' => 100.0, '2026-01-06' => 110.0, '2026-01-07' => 99.0],
@@ -52,7 +52,7 @@ class MarketSnapshotBuilderTest extends TestCase
         $this->assertEqualsWithDelta((99.0 / 109.5 - 1) * 100, $snapshots['2026-01-07']->maDeviationPct, 0.0001);
     }
 
-    public function test_VIXとドル円は当日以前の直近の値で補完する(): void
+    public function test_vi_xとドル円は当日以前の直近の値で補完する(): void
     {
         $snapshots = (new MarketSnapshotBuilder(highWindowDays: 5, movingAverageDays: 2))->build(
             sp500: ['2026-01-05' => 100.0, '2026-01-06' => 100.0, '2026-01-07' => 100.0],
@@ -81,7 +81,7 @@ class MarketSnapshotBuilderTest extends TestCase
         $this->assertEqualsWithDelta((135.0 / 147.5 - 1) * 100, $snapshots['2026-01-07']->usdJpyDeviationPct, 0.0001);
     }
 
-    public function test_円建て価格はSP500とドル円の積(): void
+    public function test_円建て価格は_s_p500とドル円の積(): void
     {
         $snapshots = (new MarketSnapshotBuilder(highWindowDays: 5, movingAverageDays: 2))->build(
             sp500: ['2026-01-05' => 100.0, '2026-01-06' => 110.0],

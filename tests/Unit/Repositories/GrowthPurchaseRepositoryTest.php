@@ -51,7 +51,7 @@ class GrowthPurchaseRepositoryTest extends TestCase
         $this->assertDatabaseMissing('growth_purchases', ['id' => $purchase->id]);
     }
 
-    public function test_存在しないIDの削除はfalse(): void
+    public function test_存在しない_i_dの削除はfalse(): void
     {
         $this->assertFalse($this->repository->delete(999));
     }

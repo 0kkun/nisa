@@ -11,6 +11,5 @@ final readonly class TimingLevel
         public string $label,
         public int $minScore,
         public float $multiplier,
-    ) {
-    }
+    ) {}
 }

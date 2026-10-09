@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\GrowthPurchaseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class GrowthPurchase extends Model
 {
-    /** @use HasFactory<\Database\Factories\GrowthPurchaseFactory> */
+    /** @use HasFactory<GrowthPurchaseFactory> */
     use HasFactory;
 
     protected $fillable = [

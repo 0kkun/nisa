@@ -17,6 +17,15 @@ export default defineConfig({
         tailwindcss(),
     ],
     server: {
+        // Docker 内で起動し、ホストの 5174 番から HMR を受ける
+        host: '0.0.0.0',
+        port: 5173,
+        strictPort: true,
+        origin: 'http://localhost:5174',
+        hmr: {
+            host: 'localhost',
+            clientPort: 5174,
+        },
         watch: {
             ignored: ['**/storage/framework/views/**'],
         },

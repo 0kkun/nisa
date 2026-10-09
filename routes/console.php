@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+// 米国市場の引け（日本時間 5〜6時）後に取得
+Schedule::command('market:fetch')
+    ->dailyAt('07:00')
+    ->withoutOverlapping();

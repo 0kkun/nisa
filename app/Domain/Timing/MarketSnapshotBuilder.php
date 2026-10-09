@@ -12,8 +12,7 @@ final readonly class MarketSnapshotBuilder
     public function __construct(
         private int $highWindowDays,
         private int $movingAverageDays,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<string, float>  $sp500  日付 => 終値（日付昇順）

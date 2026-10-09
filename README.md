@@ -1,58 +1,141 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 概要
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+- NISA 成長投資枠を「いつ・いくら」入れるかの目安を出すアプリ
+- S&P500・VIX・ドル円の日足から買い場スコアを出し、今月の推奨投入額を表示する
 
-## About Laravel
+## 構成
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| カテゴリ | 技術 | バージョン |
+|---|---|---|
+| 言語 | PHP | 8.5 |
+| フレームワーク | Laravel | 13.35 |
+| データベース | MySQL | 9.7 (LTS) |
+| Webサーバー | Nginx | 1.31 |
+| Node.js | Node.js | 26.x |
+| フロント | Blade / Tailwind CSS 4 / Vite 8 / Chart.js 4 |
+| テスト | PHPUnit | 13 |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## セットアップ
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+make init          # .env 作成・ビルド・composer/npm install・APP_KEY・migrate・市場データ取得
+open http://localhost:8080
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+DB の接続情報（`DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD` / `DB_ROOT_PASSWORD`）は `.env` にだけ書く。`docker-compose.yml` の MySQL コンテナはこれを参照し、未設定なら起動時にエラーになる。
 
-## Contributing
+| ポート | 用途 |
+|---|---|
+| 8080 | アプリ |
+| 3307 | MySQL |
+| 5174 | Vite (HMR) |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| DB | 用途 |
+|---|---|
+| `nisa_db` | 開発用 |
+| `nisa_testing` | テスト用。DB データ初期化時に `.docker/db/init/01-create-testing-db.sh` で自動作成。既存環境は `make create-test-db` |
 
-## Code of Conduct
+SQLite は使わない（本番と同じ MySQL で動かす）。
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 画面
 
-## Security Vulnerabilities
+| パス | 内容 |
+|---|---|
+| `/` | 買い場スコア・各指標・今月の推奨投入額・チャート |
+| `/purchases` | 成長投資枠の購入記録と、年間 240万 / 生涯 1,200万 の残り |
+| `/backtest` | 一括・毎月均等・スコア連動の3通りを過去データで比較 |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 買い場スコア
 
-## License
+閾値と倍率は `config/nisa.php` で変更できる。
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+| 指標 | 加点 |
+|---|---|
+| 52週高値からの下落率 | -5%: 1 / -10%: 2 / -15%: 3 / -20%: 4 |
+| 200日線からの乖離 | 0%以下: 1 / -5%: 2 / -10%: 3 |
+| VIX | 20以上: 1 / 25以上: 2 / 30以上: 3 |
+| ドル円の200日線乖離 | 0%以下（円高）: 1 |
+
+| 合計 | レベル | 倍率 |
+|---|---|---|
+| 6〜 | 強い買い場 | 3.0 |
+| 3〜5 | 買い増し | 2.0 |
+| 0〜2 | 通常 | 1.0 |
+
+推奨投入額 = 投資可能額 ÷ 今年の残り月数 × 倍率（1万円単位で切り捨て、12月は残り全額）
+
+## 市場データ
+
+- Yahoo Finance の chart API から取得（`^GSPC` / `^VIX` / `JPY=X`）
+- `make fetch` で手動取得。scheduler コンテナが毎日 7:00 に差分を取得する
+- 全期間は `range=max` だと3か月足に間引かれるため `period1=0` で取得する
+- ブラウザの詳細な User-Agent だと 429 になるため `Mozilla/5.0` で送る
+
+## アーキテクチャ
+
+```
+Controller / Command
+    ↓
+ServiceInterface（契約）
+    ↓
+Service（ユースケース・DIで注入）
+    ↓                ↘
+RepositoryInterface    Domain（純粋な計算: 指標・スコア・投入額）
+    ↓
+Repository → Model
+```
+
+### ディレクトリ構成
+
+```
+app/
+├── Console/Commands/      # market:fetch
+├── Domain/
+│   ├── Timing/            # MarketSnapshotBuilder, TimingScorer, InvestmentPlanner
+│   ├── Quota/             # QuotaSummary
+│   └── Backtest/          # 結果の値オブジェクト
+├── Enums/MarketSymbol.php
+├── Http/
+│   ├── Controllers/
+│   └── Requests/
+├── Services/
+│   ├── MarketData/        # YahooFinanceClient, MarketDataService
+│   ├── Quota/             # GrowthQuotaService
+│   ├── Timing/            # TimingService
+│   └── Backtest/          # BacktestService
+├── Repositories/
+└── Providers/
+    ├── RepositoryServiceProvider.php
+    └── ServiceServiceProvider.php   # Service と設定値を持つ Domain の bind
+```
+
+### 各層の責務
+
+| 層 | 責務 |
+|---|---|
+| Controller / Command | リクエスト受付、ServiceInterface の呼び出し、レスポンス返却 |
+| ServiceInterface | ユースケースの契約。Controller はこれにだけ依存する |
+| Service | ユースケースの実装（Repository と Domain の組み合わせ） |
+| Domain | DB や HTTP に依存しない計算。値オブジェクト |
+| RepositoryInterface / Repository | データアクセス |
+| Model | テーブル定義 |
+
+## テスト方針
+
+TDD（テストを先に書き、Red → Green → Refactor）で開発する。
+
+| 層 | テスト種別 | 方法 |
+|---|---|---|
+| Controller / Command | Feature Test | ServiceInterface を `createMock()` で差し替え |
+| FormRequest | Unit Test | `rules()` を Validator で検証 |
+| Service | Unit Test | Repository / Client を `createMock()`、Domain は実物 |
+| Domain | Unit Test | 純粋な PHPUnit |
+| Repository | Unit Test | MySQL の `nisa_testing` + RefreshDatabase |
+| YahooFinanceClient | Unit Test | `Http::fake()` |
+
+```bash
+make test
+```
+
+- テストは MySQL の `nisa_testing` で動く（`phpunit.xml` の `DB_DATABASE`）
+- DB の接続情報は `.env` に書く。`docker-compose.yml` の `environment` で渡すと `phpunit.xml` の設定より優先され、テストが開発用 DB で走ってしまうので使わない

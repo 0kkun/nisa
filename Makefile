@@ -1,13 +1,10 @@
 # ---------- 共通変数 ----------
 PHP_CONTAINER=app
 DB_CONTAINER=db
-MYSQL_USER=app_user
-MYSQL_PASS=app_password
-MYSQL_DB_NAME=nisa_db
 
 
 # ---------- Commands ----------
-.PHONY: help init up down build build_c app db test pint fetch npm-dev npm-build
+.PHONY: help init up down build build_c app db create-test-db test pint fetch npm-dev npm-build
 
 
 # =============================
@@ -26,11 +23,12 @@ help: ## コマンド一覧を表示
 # 初期構築
 # =============================
 init: ## 初回セットアップ（.env作成・依存インストール・マイグレーション・データ取得）
+	test -f .env || cp .env.example .env
 	docker compose up -d --build
-	docker compose exec $(PHP_CONTAINER) sh -c "test -f .env || cp .env.example .env"
 	docker compose exec $(PHP_CONTAINER) composer install
 	docker compose exec $(PHP_CONTAINER) php artisan key:generate
 	docker compose exec $(PHP_CONTAINER) php artisan migrate --force
+	$(MAKE) create-test-db
 	docker compose exec $(PHP_CONTAINER) npm install
 	docker compose exec $(PHP_CONTAINER) npm run build
 	docker compose exec $(PHP_CONTAINER) php artisan market:fetch
@@ -55,7 +53,10 @@ app: ## PHPコンテナにシェルで入る
 # MySQL
 # =============================
 db: ## MySQLコンソールを起動
-	docker compose exec $(DB_CONTAINER) mysql -u $(MYSQL_USER) -p$(MYSQL_PASS) $(MYSQL_DB_NAME)
+	docker compose exec $(DB_CONTAINER) sh -c 'mysql -u"$$MYSQL_USER" -p"$$MYSQL_PASSWORD" "$$MYSQL_DATABASE"'
+
+create-test-db: ## テスト用DB（nisa_testing）を作成
+	docker compose exec $(DB_CONTAINER) /docker-entrypoint-initdb.d/01-create-testing-db.sh
 
 
 # =============================

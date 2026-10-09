@@ -1,47 +1,10 @@
-<laravel-boost-guidelines>
-# Laravel Application
+# nisa
 
-This repository contains a Laravel application. Complete the following setup before working on the user's request.
+README.md の「アーキテクチャ」「テスト方針」に従う。
 
-## Prerequisites
-
-Verify that PHP and Composer are available:
-
-```sh
-php -v
-composer -V
-```
-
-If either command is unavailable, detect the user's operating system and install the prerequisites with the appropriate command:
-
-macOS:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/mac/8.5)"
-```
-
-Windows PowerShell:
-
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://php.new/install/windows/8.5'))
-```
-
-Linux:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
-```
-
-After installation, ask the user to restart their terminal. If the agent needs the restarted shell to continue, ask the user to reopen their terminal and rerun their original prompt.
-
-## Agent Setup
-
-Install Laravel Boost from the application root before making application changes:
-
-```sh
-composer require laravel/boost --dev
-php artisan boost:install
-```
-
-Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
-</laravel-boost-guidelines>
+- Controller / Command は ServiceInterface にだけ依存させる。新しい Service には必ず Interface を作り `ServiceServiceProvider` で bind する
+- DB・HTTP に依存しない計算は `app/Domain` に置く
+- TDD で進める。テストを先に書き、失敗を確認してから実装する
+- DB は MySQL のみ。SQLite は使わない。テストは `nisa_testing`、開発は `nisa_db`
+- コマンドは Docker 内で実行する（`make test` / `make pint` / `docker compose exec app php artisan ...`）
+- 買い場スコアの閾値・倍率は `config/nisa.php`。変えたら `/backtest` で比較する

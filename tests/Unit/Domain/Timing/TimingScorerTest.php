@@ -63,7 +63,7 @@ class TimingScorerTest extends TestCase
     }
 
     #[DataProvider('vixProvider')]
-    public function test_VIXの点数(float $vix, int $expected): void
+    public function test_vi_xの点数(float $vix, int $expected): void
     {
         $score = $this->scorer->score($this->snapshot(vix: $vix));
 

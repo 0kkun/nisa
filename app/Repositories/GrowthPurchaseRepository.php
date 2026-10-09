@@ -30,7 +30,8 @@ class GrowthPurchaseRepository implements GrowthPurchaseRepositoryInterface
     public function sumAmountByYear(int $year): int
     {
         return (int) GrowthPurchase::query()
-            ->whereBetween('purchased_on', ["{$year}-01-01", "{$year}-12-31"])
+            ->where('purchased_on', '>=', "{$year}-01-01")
+            ->where('purchased_on', '<', ($year + 1).'-01-01')
             ->sum('amount');
     }
 

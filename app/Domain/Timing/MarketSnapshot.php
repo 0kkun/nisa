@@ -21,6 +21,5 @@ final readonly class MarketSnapshot
         public ?float $usdJpyMa,
         public ?float $usdJpyDeviationPct,
         public ?float $sp500Jpy,
-    ) {
-    }
+    ) {}
 }

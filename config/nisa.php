@@ -41,7 +41,7 @@ return [
     'levels' => [
         ['key' => 'strong', 'label' => '強い買い場', 'min_score' => 6, 'multiplier' => 3.0],
         ['key' => 'buy', 'label' => '買い増し', 'min_score' => 3, 'multiplier' => 2.0],
-        ['key' => 'normal', 'label' => '通常', 'min_score' => 0, 'multiplier' => 0.5],
+        ['key' => 'normal', 'label' => '通常', 'min_score' => 0, 'multiplier' => 1.0],
     ],
 
     /*
@@ -52,5 +52,17 @@ return [
 
     'high_window_days' => 252,
     'moving_average_days' => 200,
+
+    /*
+    |--------------------------------------------------------------------------
+    | 表示・計算
+    |--------------------------------------------------------------------------
+    */
+
+    // ダッシュボードのチャートに出す営業日数
+    'history_days' => 500,
+
+    // 推奨投入額の丸め単位（円）
+    'rounding_unit' => 10_000,
 
 ];
