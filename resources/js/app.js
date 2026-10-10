@@ -22,6 +22,9 @@ const levelColors = {
 // ダッシュボード: S&P500・200日線とスコア
 const market = readJson('market-data');
 if (market) {
+    // 左右の軸はそれぞれ別に積まれるため、空の軸で上下 3:1 に揃え、価格を上段・スコアを下段に置く
+    const spacer = { type: 'linear', axis: 'y', min: 0, max: 1, ticks: { display: false }, grid: { display: false }, border: { display: false } };
+
     new Chart(document.getElementById('market-chart'), {
         data: {
             labels: market.dates,
@@ -61,8 +64,11 @@ if (market) {
             interaction: { mode: 'index', intersect: false },
             scales: {
                 x: { ticks: { maxTicksLimit: 8 }, grid: { display: false } },
-                price: { position: 'left', weight: 2, stack: 'chart', stackWeight: 3 },
-                score: { position: 'left', min: 0, max: market.maxScore, stack: 'chart', stackWeight: 1, ticks: { stepSize: market.maxScore } },
+                // 左側の軸は定義と逆順に積まれる
+                priceSpacer: { ...spacer, position: 'left', stack: 'left', stackWeight: 1 },
+                price: { position: 'left', stack: 'left', stackWeight: 3 },
+                scoreSpacer: { ...spacer, position: 'right', stack: 'right', stackWeight: 3 },
+                score: { position: 'right', min: 0, max: market.maxScore, stack: 'right', stackWeight: 1, ticks: { stepSize: market.maxScore }, grid: { drawOnChartArea: false } },
             },
             plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 12 } } },
         },
