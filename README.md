@@ -22,7 +22,7 @@ make init          # .env 作成・ビルド・composer/npm install・APP_KEY・
 open http://localhost:8080
 ```
 
-DB の接続情報（`DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD` / `DB_ROOT_PASSWORD`）は `.env` にだけ書く。`docker-compose.yml` の MySQL コンテナはこれを参照し、未設定なら起動時にエラーになる。
+MySQL コンテナは `.env` の `DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD` / `DB_ROOT_PASSWORD` を使う。
 
 | ポート | 用途 |
 |---|---|
@@ -34,8 +34,6 @@ DB の接続情報（`DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD` / `DB_ROOT_PA
 |---|---|
 | `nisa_db` | 開発用 |
 | `nisa_testing` | テスト用。DB データ初期化時に `.docker/db/init/01-create-testing-db.sh` で自動作成。既存環境は `make create-test-db` |
-
-SQLite は使わない（本番と同じ MySQL で動かす）。
 
 ## 画面
 
@@ -68,8 +66,6 @@ SQLite は使わない（本番と同じ MySQL で動かす）。
 
 - Yahoo Finance の chart API から取得（`^GSPC` / `^VIX` / `JPY=X`）
 - `make fetch` で手動取得。scheduler コンテナが毎日 7:00 に差分を取得する
-- 全期間は `range=max` だと3か月足に間引かれるため `period1=0` で取得する
-- ブラウザの詳細な User-Agent だと 429 になるため `Mozilla/5.0` で送る
 
 ## アーキテクチャ
 
@@ -136,6 +132,3 @@ TDD（テストを先に書き、Red → Green → Refactor）で開発する。
 ```bash
 make test
 ```
-
-- テストは MySQL の `nisa_testing` で動く（`phpunit.xml` の `DB_DATABASE`）
-- DB の接続情報は `.env` に書く。`docker-compose.yml` の `environment` で渡すと `phpunit.xml` の設定より優先され、テストが開発用 DB で走ってしまうので使わない

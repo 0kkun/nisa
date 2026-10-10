@@ -55,9 +55,6 @@ class ServiceServiceProvider extends ServiceProvider
         ));
     }
 
-    /**
-     * 設定値を持つ Domain クラス
-     */
     private function registerDomain(): void
     {
         $this->app->singleton(MarketSnapshotBuilder::class, fn () => new MarketSnapshotBuilder(
